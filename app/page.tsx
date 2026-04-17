@@ -52,23 +52,37 @@ export default function Home() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!url) return;
     setStep("loading");
     setProgress(0);
-    const steps = [15, 35, 55, 75, 90, 100];
-    steps.forEach((p, i) => {
-      setTimeout(() => {
-        setProgress(p);
-        if (p === 100) {
-          setTimeout(() => {
-            setHeadline(sampleAds[0].headline);
-            setBody(sampleAds[0].body);
-            setStep("result");
-          }, 400);
-        }
-      }, i * 600);
+
+    const progressSteps = [15, 35, 55, 75, 90];
+    progressSteps.forEach((p, i) => {
+      setTimeout(() => setProgress(p), i * 600);
     });
+
+    try {
+      const response = await fetch("/api/generate-ad",{
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, tone, length, audience }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "API error");
+
+      setProgress(100);
+      setTimeout(() => {
+        setHeadline(data.headline);
+        setBody(data.body);
+        setStep("result");
+      }, 400);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      alert(`Error generating ad: ${msg}`);
+      setStep("input");
+    }
   };
 
   const handleRegenerate = () => {
