@@ -10,9 +10,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "URL is required" }, { status: 400 });
   }
 
-  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "your_api_key_here") {
-    return Response.json({ error: "GEMINI_API_KEY is not set in .env.local" }, { status: 500 });
-  }
+ 
 
   let pageContext = `Website URL: ${url}`;
 
